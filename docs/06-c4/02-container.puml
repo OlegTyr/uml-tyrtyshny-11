@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Container>
+title Уровень 2 – Containers: Система автоматического тестирования
+
+Person(dev, "Разработчик")
+Person(admin, "Администратор")
+
+System_Boundary(testing, "Система автоматического тестирования") {
+  Container(web, "Веб-интерфейс", "React", "Запуск тестов, отчёты, история")
+  Container(api, "Backend API", "Kotlin / Spring Boot", "Бизнес-логика, REST")
+  Container(scheduler, "Планировщик", "Kotlin", "Запуск по расписанию, очистка истории")
+  Container(agent, "Runner-агент", "Go", "Выполняет тесты, передаёт результаты")
+  ContainerDb(db, "Основная БД", "PostgreSQL", "Прогоны, результаты, тесты")
+  ContainerQueue(bus, "Очередь событий", "RabbitMQ", "События прогонов, уведомления")
+}
+
+System_Ext(ci, "CI-система")
+System_Ext(notify, "Система уведомлений")
+
+Rel(dev, web, "Пользуется", "HTTPS")
+Rel(admin, web, "Пользуется", "HTTPS")
+Rel(web, api, "Вызывает", "JSON/HTTPS")
+Rel(ci, api, "Запускает прогоны", "REST/HTTPS")
+Rel(api, db, "Читает и пишет", "JDBC")
+Rel(api, bus, "Публикует события", "AMQP")
+Rel(bus, agent, "Доставляет задания", "AMQP")
+Rel(agent, api, "Передаёт результаты", "JSON/HTTPS")
+Rel(bus, scheduler, "Доставляет события расписания", "AMQP")
+Rel(scheduler, api, "Триггерит прогоны", "JSON/HTTPS")
+Rel(api, notify, "Отправляет уведомления", "HTTPS")
+
+SHOW_LEGEND()
+@enduml

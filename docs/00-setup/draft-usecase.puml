@@ -1,0 +1,23 @@
+@startuml
+!include ../../_style.puml
+left to right direction
+
+actor "Разработчик" as dev
+actor "CI-система" as ci <<system>>
+actor "Администратор" as admin
+
+rectangle "Система автоматического тестирования" {
+  usecase "Запустить набор тестов" as UC1
+  usecase "Посмотреть отчёт прогона" as UC2
+  usecase "Пометить тест как флаки" as UC3
+  usecase "Посмотреть историю прогонов" as UC4
+  usecase "Настроить расписание прогонов" as UC5
+}
+
+dev -- UC1
+dev -- UC2
+dev -- UC4
+ci -- UC1
+admin -- UC3
+admin -- UC5
+@enduml

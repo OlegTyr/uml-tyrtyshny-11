@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+title Уровень 3 – Components: контейнер «Backend API»
+
+Container(web, "Веб-интерфейс", "React")
+Container(agent, "Runner-агент", "Go")
+ContainerDb(db, "Основная БД", "PostgreSQL")
+ContainerQueue(bus, "Очередь событий", "RabbitMQ")
+System_Ext(notify, "Система уведомлений")
+
+Container_Boundary(api, "Backend API") {
+  Component(runCtrl, "RunController", "Spring MVC", "REST-эндпоинты прогонов")
+  Component(reportCtrl, "ReportController", "Spring MVC", "REST-эндпоинты отчётов")
+  Component(runSvc, "RunService", "Kotlin", "Создание и управление прогонами")
+  Component(flakyPolicy, "FlakyPolicy", "Kotlin", "Определение флаки-тестов")
+  Component(historySvc, "HistoryService", "Kotlin", "Чтение истории прогонов")
+  Component(eventPub, "EventPublisher", "Kotlin", "Публикация доменных событий")
+  Component(repo, "JPA Repositories", "Spring Data", "Доступ к данным")
+}
+
+Rel(web, runCtrl, "POST /runs", "JSON/HTTPS")
+Rel(web, reportCtrl, "GET /runs/{id}", "JSON/HTTPS")
+Rel(agent, runCtrl, "POST /runs/{id}/results", "JSON/HTTPS")
+
+Rel(runCtrl, runSvc, "вызывает")
+Rel(reportCtrl, historySvc, "вызывает")
+Rel(runSvc, flakyPolicy, "использует")
+Rel(runSvc, repo, "использует", "JDBC")
+Rel(historySvc, repo, "использует", "JDBC")
+Rel(runSvc, eventPub, "публикует RunCompleted")
+Rel(eventPub, bus, "отправляет", "AMQP")
+Rel(eventPub, notify, "отправляет", "HTTPS")
+
+SHOW_LEGEND()
+@enduml

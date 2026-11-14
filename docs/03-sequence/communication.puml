@@ -1,0 +1,40 @@
+@startuml
+!include ../../_style.puml
+title Диаграмма коммуникации: ВИ-01 «Запустить набор тестов»
+
+skinparam object {
+  BackgroundColor #FFFFFF
+  BorderColor #2E75B6
+}
+skinparam note {
+  BackgroundColor #FFF7E0
+  BorderColor #D4A017
+}
+
+top to bottom direction
+
+object "<u>:Разработчик</u>" as dev
+object "<u>ui : Веб-интерфейс</u>" as ui
+object "<u>runner : СервисПрогонов</u>" as runner
+object "<u>agent : RunnerАгент</u>" as agent
+object "<u>db : БД</u>" as db
+
+dev --> ui : 1: запустить("smoke-suite")
+ui --> runner : 2: создатьПрогон(набор)
+runner --> db : 2.1: INSERT run [В_ОЧЕРЕДИ]
+db --> runner : 2.2: id
+runner --> agent : 2.3: выполнить(набор)
+agent --> runner : 2.4: результаты
+runner --> db : 2.5: INSERT результаты
+runner --> ui : 3: id прогона
+ui --> dev : 4: «прогон запущен»
+
+note bottom of db
+  Нумерация десятичная:
+  2.1–2.5 — вложенные вызовы
+  внутри сообщения 2.
+  Порядок задаётся номерами,
+  а не вертикальным временем.
+end note
+
+@enduml

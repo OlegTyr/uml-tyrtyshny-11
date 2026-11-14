@@ -1,0 +1,63 @@
+@startuml
+!include ../../_style.puml
+title ВИ-01 «Запустить набор тестов»: исключения
+
+actor "Разработчик" as dev
+participant "Веб-интерфейс" as ui
+participant "СервисПрогонов" as runner
+participant "RunnerАгент" as agent
+database "БД" as db
+queue "Очередь событий" as bus
+
+dev -> ui : запустить("smoke-suite")
+activate ui
+ui -> runner : создатьПрогон(набор)
+activate runner
+
+alt нет прав на запуск
+  runner --> ui : отказ: нет прав
+  note right: событие в журнал аудита (асинхронно)
+  runner ->> bus : AccessDenied
+
+else нет свободного агента
+  runner --> ui : прогон в очереди, ETA 5 мин
+  note right: Прогон остаётся в статусе В_ОЧЕРЕДИ
+
+else агент потерял связь во время прогона
+  runner -> agent : выполнить(набор)
+  activate agent
+  agent ->> runner : heartbeat lost
+  deactivate agent
+  runner -> db : UPDATE run SET статус=ПРЕРВАН
+  runner ->> bus : RunInterrupted
+  runner --> ui : «прогон прерван, причина: связь с агентом»
+
+else тест упал по таймауту
+  runner -> agent : выполнить(набор)
+  activate agent
+  loop для каждого теста
+    agent -> agent : прогнать(тест)
+  end
+  agent --> runner : результаты (timeout на t3)
+  deactivate agent
+  runner -> db : INSERT результаты
+  runner ->> bus : TestTimedOut
+  runner --> ui : «тест t3 упал по таймауту, повторить?»
+
+else прогон выполнен
+  runner -> agent : выполнить(набор)
+  activate agent
+  loop для каждого теста
+    agent -> agent : прогнать(тест)
+  end
+  agent --> runner : результаты
+  deactivate agent
+  runner -> db : INSERT результаты, UPDATE статус=УСПЕХ
+  runner ->> bus : RunCompleted
+  runner --> ui : отчёт прогона
+end
+
+deactivate runner
+ui --> dev : результат
+deactivate ui
+@enduml

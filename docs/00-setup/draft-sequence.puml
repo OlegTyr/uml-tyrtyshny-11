@@ -1,0 +1,18 @@
+@startuml
+!include ../../_style.puml
+
+actor Разработчик as dev
+participant "Веб-интерфейс" as ui
+participant "Сервис прогонов" as runner
+participant "Runner-агент" as agent
+database "БД" as db
+
+dev -> ui : запустить("smoke-suite")
+ui -> runner : POST /runs
+runner -> db : создать Прогон
+runner -> agent : выполнить набор
+agent --> runner : результаты
+runner -> db : сохранить РезультатыТестов
+runner --> ui : id прогона
+ui --> dev : «прогон запущен»
+@enduml

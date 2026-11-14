@@ -1,0 +1,33 @@
+@startuml
+title Диаграмма развёртывания: Система автоматического тестирования
+
+node "Kubernetes-кластер" {
+  node "Pod: api (x2)" {
+    artifact "testing-api.jar"
+  }
+  node "Pod: agent (x3)" {
+    artifact "testing-agent"
+  }
+  node "Pod: scheduler (x1)" {
+    artifact "testing-scheduler.jar"
+  }
+}
+
+node "Сервер БД" {
+  database "PostgreSQL 16"
+}
+
+node "Брокер сообщений" {
+  queue "RabbitMQ 3.13"
+}
+
+node "Рабочее место разработчика" {
+  artifact "Браузер"
+}
+
+"Рабочее место разработчика" --> "Pod: api (x2)" : HTTPS/443
+"Pod: api (x2)" --> "Сервер БД" : JDBC/5432
+"Pod: api (x2)" --> "Брокер сообщений" : AMQP/5672
+"Pod: agent (x3)" --> "Брокер сообщений" : AMQP/5672
+"Pod: scheduler (x1)" --> "Брокер сообщений" : AMQP/5672
+@enduml

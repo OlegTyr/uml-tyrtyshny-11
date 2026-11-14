@@ -1,0 +1,46 @@
+@startuml
+!include ../../_style.puml
+title Жизненный цикл «Прогон» (Test Run)
+hide empty description
+
+state "В_ОЧЕРЕДИ" as Queued
+state "НАЗНАЧЕН" as Assigned
+state "ИДЁТ" as Running {
+  state "ПОДГОТОВКА" as Preparing
+  state "ВЫПОЛНЕНИЕ" as Executing
+  state "СБОР_РЕЗУЛЬТАТОВ" as Collecting
+  [*] --> Preparing
+  Preparing --> Executing : агент готов
+  Executing --> Collecting : все тесты выполнены
+  Collecting --> [*]
+}
+state "УСПЕХ" as Success
+state "ПРОВАЛ" as Failed
+state "ПРЕРВАН" as Interrupted
+state "ОТМЕНЁН" as Cancelled
+
+Queued : entry / записатьВОчередь()
+Queued : exit / уведомитьОНазначении()
+
+[*] --> Queued
+
+Queued --> Assigned : назначитьАгент()\n[агент найден]
+Queued --> Cancelled : отменить()\n[пользователь отменил]
+Queued --> Cancelled : after(30 мин)\n[агент не найден]
+
+Assigned --> Running : стартовать()\n[агент на связи]
+Assigned --> Interrupted : потеряСвязи()\n[heartbeat потерян]
+
+Running --> Success : завершить()\n[все тесты прошли]
+Running --> Failed : завершить()\n[есть упавшие тесты]
+Running --> Interrupted : потеряСвязи()\n[heartbeat потерян]
+Running --> Cancelled : отменить()\n[пользователь отменил]
+
+Interrupted --> Queued : перезапустить()\n[пользователь решил повторить]
+Failed --> Queued : повторить()\n[пользователь решил повторить]
+
+Success --> [*]
+Failed --> [*]
+Interrupted --> [*]
+Cancelled --> [*]
+@enduml

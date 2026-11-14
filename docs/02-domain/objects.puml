@@ -1,0 +1,44 @@
+@startuml
+!include ../../_style.puml
+title Состояние системы на 15.10.2026, 12:00
+
+object "<u>smoke : НаборТестов</u>" as suite {
+  название = "smoke-suite"
+  язык = "Python"
+}
+
+object "<u>t1 : Тест</u>" as t1 {
+  id = "8f14-..."
+  имя = "test_login"
+  файл = "tests/test_auth.py"
+  флаки = false
+}
+
+object "<u>proj-1 : Проект</u>" as proj {
+  название = "backend"
+}
+
+object "<u>run-42 : Прогон</u>" as run {
+  id = "9a2c-..."
+  датаСтарта = 2026-10-15 11:50
+  датаФиниша = null
+  статус = ИДЁТ
+}
+
+object "<u>r-7 : РезультатТеста</u>" as r {
+  статус = ПРОЙДЕН
+  длительность = 1200
+  лог = "..."
+}
+
+object "<u>agent-3 : RunnerАгент</u>" as a {
+  имя = "runner-03"
+  статус = ЗАНЯТ
+}
+
+proj o-- suite
+suite *-- t1
+run *-- r
+t1 -- r
+a -- run
+@enduml

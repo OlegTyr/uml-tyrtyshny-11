@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Dynamic>
+title Динамический вид C4: сценарий «Запустить набор тестов»
+
+Person(dev, "Разработчик")
+Container(web, "Веб-интерфейс", "React")
+Container(api, "Backend API", "Kotlin / Spring Boot")
+Container(agent, "Runner-агент", "Go")
+ContainerDb(db, "Основная БД", "PostgreSQL")
+ContainerQueue(bus, "Очередь событий", "RabbitMQ")
+
+RelIndex(1, dev, web, "Выбирает набор и нажимает «Запустить»")
+RelIndex(2, web, api, "POST /runs", "JSON/HTTPS")
+RelIndex(3, api, db, "Создаёт Прогон (В_ОЧЕРЕДИ)")
+RelIndex(4, api, bus, "Публикует RunCreated", "AMQP")
+RelIndex(5, bus, agent, "Доставляет задание", "AMQP")
+RelIndex(6, agent, api, "Передаёт результаты", "JSON/HTTPS")
+RelIndex(7, api, db, "Сохраняет РезультатыТестов и статус")
+RelIndex(8, api, bus, "Публикует RunCompleted", "AMQP")
+
+@enduml

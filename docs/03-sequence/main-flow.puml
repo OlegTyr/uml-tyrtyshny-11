@@ -1,0 +1,46 @@
+@startuml
+!include ../../_style.puml
+title ВИ-01 «Запустить набор тестов»: основной сценарий
+
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam sequenceParticipant padding 10
+
+actor "Разработчик" as dev
+participant "Веб-интерфейс" as ui
+participant "СервисПрогонов" as runner
+participant "RunnerАгент" as agent
+database "БД" as db
+
+dev -> ui : запустить("smoke-suite")
+activate ui
+  ui -> runner : создатьПрогон(набор)
+  activate runner
+    runner -> db : INSERT run [В_ОЧЕРЕДИ]
+    activate db
+      db --> runner : id
+    deactivate db
+
+    runner -> runner : найтиСвободныйАгент()
+
+    opt агент найден
+      runner -> agent : выполнить(набор)
+      activate agent
+        loop для каждого теста
+          agent -> agent : прогнать(тест)
+        end
+        agent --> runner : результаты
+      deactivate agent
+
+      runner -> db : INSERT результаты
+      activate db
+        db --> runner : ok
+      deactivate db
+    end
+
+    runner --> ui : id прогона
+  deactivate runner
+  ui --> dev : «прогон запущен»
+deactivate ui
+
+@enduml

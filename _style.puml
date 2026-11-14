@@ -1,0 +1,22 @@
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+
+skinparam usecase {
+  BackgroundColor #E8F1FA
+  BorderColor #2E75B6
+  ArrowColor #444444
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2E75B6
+  ArrowColor #444444
+}
+skinparam sequence {
+  ArrowColor #444444
+  LifeLineBorderColor #888888
+}

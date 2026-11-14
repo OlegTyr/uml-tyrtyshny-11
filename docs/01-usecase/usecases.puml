@@ -1,0 +1,46 @@
+@startuml
+!include ../../_style.puml
+left to right direction
+
+actor "Разработчик" as dev
+actor "CI-система" as ci <<system>>
+actor "Администратор" as admin
+actor "Система уведомлений" as notify <<system>>
+
+rectangle "Система автоматического тестирования" {
+  usecase "Запустить набор тестов" as UC_run
+  usecase "Посмотреть отчёт прогона" as UC_report
+  usecase "Посмотреть историю прогонов" as UC_hist
+  usecase "Пометить тест как флаки" as UC_flaky
+  usecase "Настроить расписание прогонов" as UC_sched
+  usecase "Отменить прогон" as UC_cancel
+  usecase "Повторить упавший тест" as UC_retry
+  usecase "Авторизоваться" as UC_auth
+  usecase "Отправить уведомление" as UC_notify
+}
+
+' Первичные связи актёров с ВИ
+dev -- UC_run
+dev -- UC_report
+dev -- UC_hist
+dev -- UC_retry
+dev -- UC_cancel
+ci -- UC_run
+admin -- UC_flaky
+admin -- UC_sched
+admin -- UC_cancel
+
+' include: включаемое выполняется ВСЕГДА, стрелка ОТ базового К включаемому
+UC_run ..> UC_auth : <<include>>
+UC_report ..> UC_auth : <<include>>
+UC_run ..> UC_notify : <<include>>
+
+' extend: расширение выполняется УСЛОВНО, стрелка ОТ расширяющего К базовому
+UC_retry ..> UC_run : <<extend>>\n[тест упал]
+
+' Обобщение актёров: разработчик — частный случай администратора
+admin <|-- dev
+
+' Вторичный актёр получает события
+UC_notify -- notify
+@enduml

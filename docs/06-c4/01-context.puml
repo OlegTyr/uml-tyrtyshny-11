@@ -16,4 +16,4 @@ Rel(ci, testing, "Триггерит прогоны", "REST/HTTPS")
 Rel(testing, notify, "Отправляет уведомления о завершении", "HTTPS")
 
 SHOW_LEGEND()
-@enduml
+//@enduml

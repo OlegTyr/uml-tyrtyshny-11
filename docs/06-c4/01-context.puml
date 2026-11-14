@@ -1,4 +1,5 @@
 @startuml
+это_не_команда_plantuml
 !include <C4/C4_Context>
 title Уровень 1 – System Context: Система автоматического тестирования
 
@@ -16,4 +17,4 @@ Rel(ci, testing, "Триггерит прогоны", "REST/HTTPS")
 Rel(testing, notify, "Отправляет уведомления о завершении", "HTTPS")
 
 SHOW_LEGEND()
-//@enduml
+@enduml
